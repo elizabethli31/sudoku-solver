@@ -52,29 +52,29 @@ public class crooks {
         return included;
     }
 
-    static ArrayList<Integer> get_possibilities(int[][] board, int row, int col)
+    static ArrayList<Integer> getPossibilities(int[][] board, int row, int col)
     {
         ArrayList<Integer> included = onBoard(board, row, col);
-        ArrayList<Integer> not_included = new ArrayList<Integer>();
+        ArrayList<Integer> notIncluded = new ArrayList<Integer>();
 
         for (int i = 1; i <= 9; i++) 
         {
             if (included.contains(i) == true)
-                not_included.add(i);
+                notIncluded.add(i);
         }
 
-        return not_included;
+        return notIncluded;
     }
 
-    static boolean singleton(ArrayList<Integer> not_included)
+    static boolean singleton(ArrayList<Integer> notIncluded)
     {
-        if (not_included.size() == 1)
+        if (notIncluded.size() == 1)
             return true;
         else
             return false;
     }
 
-    static boolean same_column(ArrayList<myPair> coords)
+    static boolean sameColumn(ArrayList<myPair> coords)
     {
         for (int i = 1; i < coords.size(); i++)
         {
@@ -84,7 +84,7 @@ public class crooks {
         return true;
     }
 
-    static boolean same_row(ArrayList<myPair> coords)
+    static boolean sameRow(ArrayList<myPair> coords)
     {
         for (int i = 1; i < coords.size(); i++)
         {
@@ -94,7 +94,7 @@ public class crooks {
         return true;
     }
 
-    static boolean same_box(ArrayList<myPair> coords)
+    static boolean sameBox(ArrayList<myPair> coords)
     {
         int row = coords.get(0).key();
         int col = coords.get(0).value();
@@ -114,9 +114,9 @@ public class crooks {
         return true;
     }
 
-    static Map<myPair, ArrayList<Integer>> get_board(int[][] board)
+    static Map<myPair, ArrayList<Integer>> getBoard(int[][] board)
     {
-        Map<myPair, ArrayList<Integer>> board_by_coords = new HashMap<>();
+        Map<myPair, ArrayList<Integer>> boardByCoords = new HashMap<>();
         for (int i = 0; i < 9; i++)
         {
             for (int j = 0; j < 9; j++)
@@ -124,95 +124,89 @@ public class crooks {
                 if (board[i][j] != 0)
                     continue;
                 
-                ArrayList<Integer> possibilities = get_possibilities(board, i, j);
+                ArrayList<Integer> possibilities = getPossibilities(board, i, j);
 
-                // if (singleton(possibilities)) {
-                //     board[i][j] = possibilities.get(0);
-                // }
-                // else
-                // {
-                    myPair coords = new myPair(i, j);
-                    board_by_coords.put(coords, possibilities);
-                
+                myPair coords = new myPair(i, j);
+                boardByCoords.put(coords, possibilities);
             }
         }
 
-        return board_by_coords;
+        return boardByCoords;
     }
 
-    static Map<ArrayList<Integer>, ArrayList<myPair>> get_all_sets(Map<myPair, ArrayList<Integer>> board_by_coords)
+    static Map<ArrayList<Integer>, ArrayList<myPair>> getAllSets(Map<myPair, ArrayList<Integer>> boardByCoords)
     {
-        Map<ArrayList<Integer>, ArrayList<myPair>> all_possibilities = new HashMap<>();
+        Map<ArrayList<Integer>, ArrayList<myPair>> allPossibilities = new HashMap<>();
 
-        for (Map.Entry<myPair, ArrayList<Integer>> cell : board_by_coords.entrySet())
+        for (Map.Entry<myPair, ArrayList<Integer>> cell : boardByCoords.entrySet())
         {
             myPair coords = cell.getKey();
             ArrayList<Integer> possibilities = cell.getValue();
 
-            ArrayList<myPair> values = all_possibilities.get(possibilities);
+            ArrayList<myPair> values = allPossibilities.get(possibilities);
 
             if (values != null) {
                 values.add(coords);  
             }
-            all_possibilities.put(possibilities, values);
+            allPossibilities.put(possibilities, values);
         }
 
-        return all_possibilities;
+        return allPossibilities;
     }
 
-    static Map<ArrayList<Integer>, ArrayList<myPair>> get_preemptive_sets(Map<ArrayList<Integer>, 
-                                                                   ArrayList<myPair>> all_possibilities)
+    static Map<ArrayList<Integer>, ArrayList<myPair>> getPreemptiveSets(Map<ArrayList<Integer>, 
+                                                                   ArrayList<myPair>> allPossibilities)
     {
-        Map<ArrayList<Integer>, ArrayList<myPair>> preemptive_sets = new HashMap<>();
+        Map<ArrayList<Integer>, ArrayList<myPair>> preemptiveSets = new HashMap<>();
 
-        for (Map.Entry<ArrayList<Integer>, ArrayList<myPair>> possibility : all_possibilities.entrySet()) 
+        for (Map.Entry<ArrayList<Integer>, ArrayList<myPair>> possibility : allPossibilities.entrySet()) 
         {
             ArrayList<Integer> nums = possibility.getKey();
-            ArrayList<myPair> all_coords = possibility.getValue();
+            ArrayList<myPair> allCoords = possibility.getValue();
 
-            if (same_box(all_coords) &&
-                same_column(all_coords) &&
-                same_row(all_coords) &&
-                nums.size() == all_coords.size())
+            if (sameBox(allCoords) &&
+                sameColumn(allCoords) &&
+                sameRow(allCoords) &&
+                nums.size() == allCoords.size())
                 {
-                    preemptive_sets.put(nums, all_coords);
+                    preemptiveSets.put(nums, allCoords);
                 }
         }
-        return preemptive_sets;
+        return preemptiveSets;
     }
 
-    static Map<myPair, ArrayList<Integer>> remove_coords(Map<ArrayList<Integer>, ArrayList<myPair>> preemptive, 
+    static Map<myPair, ArrayList<Integer>> removeCoords(Map<ArrayList<Integer>, ArrayList<myPair>> preemptive, 
                               Map<ArrayList<Integer>, ArrayList<myPair>> all,
-                              Map<myPair, ArrayList<Integer>> board_by_coords) 
+                              Map<myPair, ArrayList<Integer>> boardByCoords) 
     {
         for (Map.Entry<ArrayList<Integer>, ArrayList<myPair>> one : preemptive.entrySet())
         {
             ArrayList<Integer> possibilities = one.getKey();
-            ArrayList<myPair> preemptive_coords = one.getValue();
-            ArrayList<myPair> all_coords = all.get(possibilities);
+            ArrayList<myPair> preemptiveCoords = one.getValue();
+            ArrayList<myPair> allCoords = all.get(possibilities);
 
-            ArrayList<myPair> coords_to_update = new ArrayList<myPair>(all_coords);
-            coords_to_update.removeAll(preemptive_coords);
+            ArrayList<myPair> coordsToUpdate = new ArrayList<myPair>(allCoords);
+            coordsToUpdate.removeAll(preemptiveCoords);
 
 
-            for (int i = 0; i < coords_to_update.size(); i++)
+            for (int i = 0; i < coordsToUpdate.size(); i++)
             {
-                myPair coord = coords_to_update.get(i);
-                ArrayList<Integer> new_possibilities = board_by_coords.get(coord);
-                new_possibilities.removeAll(possibilities);
+                myPair coord = coordsToUpdate.get(i);
+                ArrayList<Integer> newPossibilities = boardByCoords.get(coord);
+                newPossibilities.removeAll(possibilities);
 
-                board_by_coords.put(coord, new_possibilities);
+                boardByCoords.put(coord, newPossibilities);
             }
         }
 
-        return board_by_coords;
+        return boardByCoords;
     }
 
-    static boolean update_board(int[][] board, Map<myPair, ArrayList<Integer>> board_by_coords)
+    static boolean updateBoard(int[][] board, Map<myPair, ArrayList<Integer>> boardByCoords)
     {
         boolean change = false;
 
-        for (Map.Entry<myPair, ArrayList<Integer>> cell : board_by_coords.entrySet())
+        for (Map.Entry<myPair, ArrayList<Integer>> cell : boardByCoords.entrySet())
         {
             myPair coord = cell.getKey();
             int row = coord.key();
@@ -223,7 +217,7 @@ public class crooks {
             {
                 board[row][col] = possibilities.get(0);
                 change = true;
-                board_by_coords.remove(coord);
+                boardByCoords.remove(coord);
             }
         }
         return change;
@@ -231,13 +225,13 @@ public class crooks {
 
     static boolean crooksSolve(int[][]board)
     {
-        Map<myPair, ArrayList<Integer>> board_by_coords = get_board(board);
+        Map<myPair, ArrayList<Integer>> boardByCoords = getBoard(board);
 
-        while(update_board(board, board_by_coords))
+        while(updateBoard(board, boardByCoords))
         {
-            Map<ArrayList<Integer>, ArrayList<myPair>> all_possibilities = get_all_sets(board_by_coords);
-            Map<ArrayList<Integer>, ArrayList<myPair>> preemptive_sets = get_preemptive_sets(all_possibilities);
-            board_by_coords = remove_coords(preemptive_sets, all_possibilities, board_by_coords);
+            Map<ArrayList<Integer>, ArrayList<myPair>> allPossibilities = getAllSets(boardByCoords);
+            Map<ArrayList<Integer>, ArrayList<myPair>> preemptiveSets = getPreemptiveSets(allPossibilities);
+            boardByCoords = removeCoords(preemptiveSets, allPossibilities, boardByCoords);
         }
 
         return backtracking.solveSudoku(board);
